@@ -8,4 +8,7 @@ set(TARGET_M "-m32")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TARGET_M}")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${TARGET_M}")
 
-add_library(psa "psa_openrct2.cpp" "MemoryStream.cpp")
+find_package(ZLIB REQUIRED)
+
+add_library(psa "psa_openrct2.cpp" "MemoryStream.cpp" "main.cpp")
+target_link_libraries(psa ZLIB::ZLIB)
