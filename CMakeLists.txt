@@ -8,7 +8,7 @@ set(TARGET_M "-m32")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TARGET_M}")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${TARGET_M}")
 
-find_package(ZLIB REQUIRED)
+add_executable(psa "psa_openrct2.cpp" "MemoryStream.cpp" "IStream.cpp" "Guard.cpp" "String.cpp" "Console.cpp" "UTF8.cpp" "main.cpp")
 
-add_library(psa "psa_openrct2.cpp" "MemoryStream.cpp" "main.cpp")
-target_link_libraries(psa ZLIB::ZLIB)
+# Don't bother doing find_package(), it probably won't give correct results for 32-bit anyway
+target_link_libraries(psa z icuuc icudata)
