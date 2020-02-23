@@ -31,7 +31,9 @@ struct attached_paint_struct
     uint8_t pad_0D;
     attached_paint_struct* next; // 0x0E
 };
+#ifndef __x86_64
 assert_struct_size(attached_paint_struct, 0x12);
+#endif
 
 struct paint_string_struct
 {
@@ -42,7 +44,9 @@ struct paint_string_struct
     uint32_t args[4];          // 0x0A
     uint8_t* y_offsets;        // 0x1A
 };
+#ifndef __x86_64
 assert_struct_size(paint_string_struct, 0x1e);
+#endif
 #pragma pack(pop)
 
 struct paint_struct_bound_box
@@ -95,7 +99,9 @@ struct paint_struct
     uint16_t map_y;           // 0x2E
     TileElement* tileElement; // 0x30 (or sprite pointer)
 };
+#ifndef __x86_64
 assert_struct_size(paint_struct, 0x34);
+#endif
 
 struct rct_drawpixelinfo
 {
