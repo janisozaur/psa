@@ -11,4 +11,4 @@ set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${TARGET_M}")
 add_executable(psa "psa_openrct2.cpp" "MemoryStream.cpp" "IStream.cpp" "Guard.cpp" "String.cpp" "Console.cpp" "UTF8.cpp" "main.cpp")
 
 # Don't bother doing find_package(), it probably won't give correct results for 32-bit anyway
-target_link_libraries(psa z icuuc icudata)
+target_link_libraries(psa z icuuc icudata benchmark)
