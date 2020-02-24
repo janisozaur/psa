@@ -1,7 +1,7 @@
 #include "Addresses.h"
 #include "MemoryStream.h"
 #include "structs.h"
-#include "pas_openrct2.h"
+#include "psa_openrct2.h"
 
 #include <benchmark/benchmark.h>
 #include <cstdio>
@@ -91,13 +91,13 @@ static std::vector<paint_session> extract_paint_session(const char* fname)
 {
     FILE* file = fopen(fname, "r");
     uLongf cb;
-    fread(&cb, 4, 1, file);
+    int res = fread(&cb, 4, 1, file);
     fseek(file, 0, SEEK_END);
     uint64_t fsize = ftell(file) - 4;
     fseek(file, 4, SEEK_SET);
     uint32_t org_cb = cb;
     auto compressedBuffer = std::make_unique<uint8_t[]>(fsize - 4);
-    fread(compressedBuffer.get(), fsize - 4, 1, file);
+    res = fread(compressedBuffer.get(), fsize - 4, 1, file);
     fclose(file);
     auto buffer = std::make_unique<uint8_t[]>(cb);
     uncompress(buffer.get(), &cb, compressedBuffer.get(), fsize - 4);

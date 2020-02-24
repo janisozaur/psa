@@ -1,5 +1,5 @@
 #include "structs.h"
-#include "pas_openrct2.h"
+#include "psa_openrct2.h"
 
 template<uint8_t>
 static bool check_bounding_box(const paint_struct_bound_box& initialBBox, const paint_struct_bound_box& currentBBox)
