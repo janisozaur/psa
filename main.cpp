@@ -142,6 +142,27 @@ static void BM_paint_session_arrange(benchmark::State& state, const std::vector<
     delete[] local_s;
 }
 
+static void BM_paint_session_arrange_opt(benchmark::State& state, const std::vector<paint_session> inputSessions)
+{
+    std::vector<paint_session> sessions = inputSessions;
+    // Fixing up the pointers continuously is wasteful. Fix it up once for `sessions` and store a copy.
+    // Keep in mind we need bit-exact copy, as the lists use pointers.
+    // Once sorted, just restore the copy with the original fixed-up version.
+    paint_session* local_s = new paint_session[std::size(sessions)];
+    fixup_pointers(&sessions[0], std::size(sessions), std::size(local_s->PaintStructs), std::size(local_s->Quadrants));
+    std::copy_n(sessions.cbegin(), std::size(sessions), local_s);
+    for (auto _ : state)
+    {
+        state.PauseTiming();
+        std::copy_n(local_s, std::size(sessions), sessions.begin());
+        state.ResumeTiming();
+        paint_session_arrange_opt(&sessions[0]);
+        benchmark::DoNotOptimize(sessions);
+    }
+    state.SetItemsProcessed(state.iterations() * std::size(sessions));
+    delete[] local_s;
+}
+
 #ifndef __x86_64
 // Based a lot on https://github.com/OpenRCT2/OpenRCT2/commit/d6fd03070268a21547f18bec8a0c87abcf30eef2
 static void BM_paint_session_arrange_vanilla(benchmark::State& state, const std::vector<paint_session> inputSessions)
@@ -206,6 +227,8 @@ int main(int argc, char* argv[])
             {
                 std::string name(argv[i]);
                 benchmark::RegisterBenchmark(name.c_str(), BM_paint_session_arrange, sessions);
+                std::string name_opt = name + "_opt";
+                benchmark::RegisterBenchmark(name_opt.c_str(), BM_paint_session_arrange_opt, sessions);
 #ifndef __x86_64
                 name += " vanilla";
                 benchmark::RegisterBenchmark(name.c_str(), BM_paint_session_arrange_vanilla, sessions);
