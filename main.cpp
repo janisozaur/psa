@@ -9,6 +9,7 @@
 #include <iostream>
 #include <iterator>
 #include <memory>
+#include <sys/mman.h>
 #include <zlib.h>
 
 #define RCT2_ADDRESS_CURRENT_ROTATION 0x0141E9E0
@@ -180,10 +181,8 @@ static void BM_paint_session_arrange_vanilla(benchmark::State& state, const std:
         std::copy_n(local_s, std::size(sessions), sessions.begin());
         RCT2_GLOBAL(0x00EE7888, paint_struct*) = &sessions[0].PaintHead;
         RCT2_GLOBAL(0x00F1AD0C, uint32_t) = sessions[0].QuadrantBackIndex;
-        RCT2_GLOBAL(0x00F1AD10, uint32_t) = sessions[0].QuadrantBackIndex;
-        for (int i = 0; i < 4000; i++) {
-            RCT2_GLOBAL(0x00F1A50C + 4 * i, paint_struct*) = &sessions[0].PaintStructs[i].basic;
-        }
+        RCT2_GLOBAL(0x00F1AD10, uint32_t) = sessions[0].QuadrantFrontIndex;
+        memcpy((void *)0x00F1A50C, &sessions[0].Quadrants[0], 512 * sizeof(paint_struct *));
         RCT2_GLOBAL(0x00EE7884, paint_struct*) = sessions[0].PaintStructs[0].basic.next_quadrant_ps;
         RCT2_GLOBAL(RCT2_ADDRESS_CURRENT_ROTATION, uint32_t) = sessions[0].CurrentRotation;
         memset((void *)0x0098185C, 0, 256);
@@ -194,10 +193,29 @@ static void BM_paint_session_arrange_vanilla(benchmark::State& state, const std:
     state.SetItemsProcessed(state.iterations() * std::size(sessions));
     delete[] local_s;
 }
+
+static void fixup()
+{
+    const char * segments = (char *)(0x401000);
+    int err = mprotect((void *)0x401000, 0x8a4000 - 0x401000, PROT_READ | PROT_EXEC | PROT_WRITE);
+	if (err != 0)
+	{
+		perror("mprotect");
+	}
+	// section: rw data
+	err = mprotect((void *)0x8a4000, 0x01429000 - 0x8a4000, PROT_READ | PROT_WRITE);
+	if (err != 0)
+	{
+		perror("mprotect");
+	}
+}
+#else
+static void fixup() {}
 #endif
 
 int main(int argc, char* argv[])
 {
+    fixup();
     {
         // Register some basic "baseline" benchmark
         std::vector<paint_session> sessions(1);
