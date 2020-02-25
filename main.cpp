@@ -122,6 +122,68 @@ static std::vector<paint_session> extract_paint_session(const char* fname)
     return sessions;
 }
 
+static std::string paint_struct_list_to_string(const paint_struct* ps, const paint_struct* base)
+{
+    std::string result;
+    while (ps) {
+        result += std::to_string(ps - base) + ";";
+        ps = ps->next_quadrant_ps;
+    }
+    return result;
+}
+
+static bool verify(const std::vector<paint_session> inputSessions)
+{
+    std::vector<paint_session> sessions = inputSessions;
+    // Fixing up the pointers continuously is wasteful. Fix it up once for `sessions` and store a copy.
+    // Keep in mind we need bit-exact copy, as the lists use pointers.
+    // Once sorted, just restore the copy with the original fixed-up version.
+    paint_session* local_s = new paint_session[std::size(sessions)];
+    fixup_pointers(&sessions[0], std::size(sessions), std::size(local_s->PaintStructs), std::size(local_s->Quadrants));
+    {
+        std::copy_n(sessions.cbegin(), std::size(sessions), local_s);
+        paint_session_arrange(&sessions[0]);
+    }
+    auto result1 = paint_struct_list_to_string(&sessions[0].PaintHead, &sessions[0].PaintStructs[0].basic);
+    {
+        std::copy_n(local_s, std::size(sessions), sessions.begin());
+        paint_session_arrange_opt(&sessions[0]);
+    }
+    auto result2 = paint_struct_list_to_string(&sessions[0].PaintHead, &sessions[0].PaintStructs[0].basic);
+    {
+        std::copy_n(local_s, std::size(sessions), sessions.begin());
+        paint_struct ps;
+        RCT2_GLOBAL(0x00EE7888, paint_struct*) = &ps;
+        RCT2_GLOBAL(0x00F1AD0C, uint32_t) = sessions[0].QuadrantBackIndex;
+        RCT2_GLOBAL(0x00F1AD10, uint32_t) = sessions[0].QuadrantFrontIndex;
+        memcpy((void *)0x00F1A50C, &sessions[0].Quadrants[0], 512 * sizeof(paint_struct *));
+        RCT2_GLOBAL(0x00EE7884, paint_struct*) = &sessions[0].PaintHead;
+        RCT2_GLOBAL(RCT2_ADDRESS_CURRENT_ROTATION, uint32_t) = sessions[0].CurrentRotation;
+        memset((void *)0x0098185C, 0, 256);
+        RCT2_CALLPROC_X(0x688217, 0, 0, 0, 0, 0, 0, 0);
+    }
+    auto result3 = paint_struct_list_to_string(&sessions[0].PaintHead, &sessions[0].PaintStructs[0].basic);
+    bool ok = true;
+    std::cout << "r1: " << result1 << std::endl;
+    std::cout << "r2: " << result2 << std::endl;
+    std::cout << "r3: " << result3 << std::endl;
+    if (result1 != result2) {
+        std::cout << "error 1" << std::endl;
+        ok = false;
+    }
+    if (result2 != result3) {
+        std::cout << "error 2" << std::endl;
+        ok = false;
+    }
+    if (result1 != result3) {
+        std::cout << "error 3" << std::endl;
+        ok = false;
+    }
+
+    delete[] local_s;
+    return ok;
+}
+
 static void BM_paint_session_arrange(benchmark::State& state, const std::vector<paint_session> inputSessions)
 {
     std::vector<paint_session> sessions = inputSessions;
@@ -243,6 +305,10 @@ int main(int argc, char* argv[])
             std::vector<paint_session> sessions = extract_paint_session(argv[i]);
             if (!sessions.empty())
             {
+                if (!verify(sessions))
+                {
+                    return 1;
+                }
                 std::string name(argv[i]);
                 benchmark::RegisterBenchmark(name.c_str(), BM_paint_session_arrange, sessions);
                 std::string name_opt = name + "_opt";
