@@ -12,12 +12,13 @@ template<> bool check_bounding_box<0>(const paint_struct_bound_box& initialBBox,
     const static uint8_t directions[64] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0 };
-    bool c1 = initialBBox.z_end >= currentBBox.z;
-    bool c2 = initialBBox.y_end >= currentBBox.y;
+    // TODO: reorder comparisons
     bool c3 = initialBBox.x_end >= currentBBox.x;
-    bool c4 = initialBBox.z < currentBBox.z_end;
-    bool c5 = initialBBox.y < currentBBox.y_end;
+    bool c2 = initialBBox.y_end >= currentBBox.y;
+    bool c1 = initialBBox.z_end >= currentBBox.z;
     bool c6 = initialBBox.x < currentBBox.x_end;
+    bool c5 = initialBBox.y < currentBBox.y_end;
+    bool c4 = initialBBox.z < currentBBox.z_end;
     uint8_t c_all = (c1 << 5) | (c2 << 4) | (c3 << 3) | (c4 << 2) | (c5 << 1) | (c6 << 0);
 
     return directions[c_all];
