@@ -150,22 +150,35 @@ static bool verify(const std::vector<paint_session> inputSessions)
         paint_session_arrange_opt(&sessions[0]);
     }
     auto result2 = paint_struct_list_to_string(&sessions[0].PaintHead, &sessions[0].PaintStructs[0].basic);
+    std::string result3;
     {
         std::copy_n(local_s, std::size(sessions), sessions.begin());
         paint_struct ps;
-        RCT2_GLOBAL(0x00EE7888, paint_struct*) = &ps;
-        RCT2_GLOBAL(0x00F1AD0C, uint32_t) = sessions[0].QuadrantBackIndex;
-        RCT2_GLOBAL(0x00F1AD10, uint32_t) = sessions[0].QuadrantFrontIndex;
-        memcpy((void *)0x00F1A50C, &sessions[0].Quadrants[0], 512 * sizeof(paint_struct *));
-        RCT2_GLOBAL(0x00EE7884, paint_struct*) = &sessions[0].PaintHead;
+        RCT2_GLOBAL(0x00EE7888, paint_struct*) = sessions[0].Quadrants[0xe9];
+        RCT2_GLOBAL(0x00F1AD0C, uint32_t) = 0xe9;//sessions[0].QuadrantBackIndex;
+        RCT2_GLOBAL(0x00F1AD10, uint32_t) = 0x117;//sessions[0].QuadrantFrontIndex;
+        RCT2_GLOBAL(0x00EE7880, paint_entry *) = &sessions[0].PaintStructs[4000 - 1];
+        memcpy(RCT2_ADDRESS(0x00F1A50C, paint_struct), &sessions[0].Quadrants[0], 512 * sizeof(paint_struct *));
+        memcpy(RCT2_ADDRESS(0x00EE788C, paint_struct), &sessions[0].PaintStructs[0], 4000 * sizeof(paint_struct));
+        RCT2_GLOBAL(0x00EE7884, paint_struct*) = &sessions[0].PaintStructs[2990].basic;
         RCT2_GLOBAL(RCT2_ADDRESS_CURRENT_ROTATION, uint32_t) = sessions[0].CurrentRotation;
-        memset((void *)0x0098185C, 0, 256);
+
+        printf("base =       0x%08x\n", &sessions[0].PaintStructs[0]);
+        printf("0x00EE7888 = 0x%08x\n", RCT2_GLOBAL(0x00EE7888, uint32_t));
+        printf("0x00F1AD0C = 0x%08x\n", RCT2_GLOBAL(0x00F1AD0C, uint32_t));
+        printf("0x00F1AD10 = 0x%08x\n", RCT2_GLOBAL(0x00F1AD10, uint32_t));
+
         RCT2_CALLPROC_X(0x688217, 0, 0, 0, 0, 0, 0, 0);
+        result3 = paint_struct_list_to_string(RCT2_GLOBAL(0x00EE7888, paint_struct*), &sessions[0].PaintStructs[0].basic);
+        std::cout << "glob: " << result3 << std::endl;
+        //result3 = paint_struct_list_to_string(&ps, &sessions[0].PaintStructs[0].basic);
+        //std::cout << "ps  : " << result3 << std::endl;
+        result3 = paint_struct_list_to_string(&sessions[0].PaintHead, &sessions[0].PaintStructs[0].basic);
+        std::cout << "phea: " << result3 << std::endl;
     }
-    auto result3 = paint_struct_list_to_string(&sessions[0].PaintHead, &sessions[0].PaintStructs[0].basic);
     bool ok = true;
-    std::cout << "r1: " << result1 << std::endl;
-    std::cout << "r2: " << result2 << std::endl;
+    //std::cout << "r1: " << result1 << std::endl;
+    //std::cout << "r2: " << result2 << std::endl;
     std::cout << "r3: " << result3 << std::endl;
     if (result1 != result2) {
         std::cout << "error 1" << std::endl;
