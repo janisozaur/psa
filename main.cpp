@@ -230,7 +230,7 @@ static void BM_paint_session_arrange_opt(benchmark::State& state, const std::vec
     delete[] local_s;
 }
 
-#ifndef __x86_64
+#if defined(__i386__) || defined(_M_IX86)
 // Based a lot on https://github.com/OpenRCT2/OpenRCT2/commit/d6fd03070268a21547f18bec8a0c87abcf30eef2
 static void BM_paint_session_arrange_vanilla(benchmark::State& state, const std::vector<paint_session> inputSessions)
 {
@@ -245,13 +245,15 @@ static void BM_paint_session_arrange_vanilla(benchmark::State& state, const std:
     {
         state.PauseTiming();
         std::copy_n(local_s, std::size(sessions), sessions.begin());
-        RCT2_GLOBAL(0x00EE7888, paint_struct*) = &sessions[0].PaintHead;
+        paint_struct ps;
+        RCT2_GLOBAL(0x00EE7888, paint_struct*) = &ps;
         RCT2_GLOBAL(0x00F1AD0C, uint32_t) = sessions[0].QuadrantBackIndex;
         RCT2_GLOBAL(0x00F1AD10, uint32_t) = sessions[0].QuadrantFrontIndex;
-        memcpy((void *)0x00F1A50C, &sessions[0].Quadrants[0], 512 * sizeof(paint_struct *));
-        RCT2_GLOBAL(0x00EE7884, paint_struct*) = sessions[0].PaintStructs[0].basic.next_quadrant_ps;
+        RCT2_GLOBAL(0x00EE7880, paint_entry *) = &sessions[0].PaintStructs[4000 - 1];
+        memcpy(RCT2_ADDRESS(0x00F1A50C, paint_struct), &sessions[0].Quadrants[0], 512 * sizeof(paint_struct *));
+        memcpy(RCT2_ADDRESS(0x00EE788C, paint_struct), &sessions[0].PaintStructs[0].basic, 4000 * sizeof(paint_struct));
+        RCT2_GLOBAL(0x00EE7884, paint_struct*) = nullptr;
         RCT2_GLOBAL(RCT2_ADDRESS_CURRENT_ROTATION, uint32_t) = sessions[0].CurrentRotation;
-        memset((void *)0x0098185C, 0, 256);
         state.ResumeTiming();
         RCT2_CALLPROC_X(0x688217, 0, 0, 0, 0, 0, 0, 0);
         benchmark::DoNotOptimize(sessions);
@@ -317,7 +319,7 @@ int main(int argc, char* argv[])
                 benchmark::RegisterBenchmark(name.c_str(), BM_paint_session_arrange, sessions);
                 std::string name_opt = name + "_opt";
                 benchmark::RegisterBenchmark(name_opt.c_str(), BM_paint_session_arrange_opt, sessions);
-#ifndef __x86_64
+#if defined(__i386__) || defined(_M_IX86)
                 name += " vanilla";
                 benchmark::RegisterBenchmark(name.c_str(), BM_paint_session_arrange_vanilla, sessions);
 #endif
