@@ -134,6 +134,7 @@ static std::string paint_struct_list_to_string(const paint_struct* ps, const pai
 
 static bool verify(const std::vector<paint_session> inputSessions)
 {
+    constexpr int session_to_use = 0;
     std::vector<paint_session> sessions = inputSessions;
     // Fixing up the pointers continuously is wasteful. Fix it up once for `sessions` and store a copy.
     // Keep in mind we need bit-exact copy, as the lists use pointers.
@@ -143,28 +144,28 @@ static bool verify(const std::vector<paint_session> inputSessions)
     std::copy_n(sessions.cbegin(), std::size(sessions), local_s);
     {
         std::copy_n(local_s, std::size(sessions), sessions.begin());
-        paint_session_arrange(&sessions[0]);
+        paint_session_arrange(&sessions[session_to_use]);
     }
-    auto result1 = paint_struct_list_to_string(sessions[0].PaintHead.next_quadrant_ps, &sessions[0].PaintStructs[0].basic);
+    auto result1 = paint_struct_list_to_string(sessions[session_to_use].PaintHead.next_quadrant_ps, &sessions[session_to_use].PaintStructs[0].basic);
     {
         std::copy_n(local_s, std::size(sessions), sessions.begin());
         paint_session_arrange_opt(&sessions[session_to_use]);
     }
-    auto result2 = paint_struct_list_to_string(sessions[0].PaintHead.next_quadrant_ps, &sessions[0].PaintStructs[0].basic);
+    auto result2 = paint_struct_list_to_string(sessions[session_to_use].PaintHead.next_quadrant_ps, &sessions[session_to_use].PaintStructs[0].basic);
     std::string result3;
     {
         std::copy_n(local_s, std::size(sessions), sessions.begin());
         paint_struct ps;
         RCT2_GLOBAL(0x00EE7888, paint_struct*) = &ps;
-        RCT2_GLOBAL(0x00F1AD0C, uint32_t) = sessions[0].QuadrantBackIndex;
-        RCT2_GLOBAL(0x00F1AD10, uint32_t) = sessions[0].QuadrantFrontIndex;
-        RCT2_GLOBAL(0x00EE7880, paint_entry *) = &sessions[0].PaintStructs[4000 - 1];
-        memcpy(RCT2_ADDRESS(0x00F1A50C, paint_struct), &sessions[0].Quadrants[0], 512 * sizeof(paint_struct *));
-        memcpy(RCT2_ADDRESS(0x00EE788C, paint_struct), &sessions[0].PaintStructs[0].basic, 4000 * sizeof(paint_struct));
+        RCT2_GLOBAL(0x00F1AD0C, uint32_t) = sessions[session_to_use].QuadrantBackIndex;
+        RCT2_GLOBAL(0x00F1AD10, uint32_t) = sessions[session_to_use].QuadrantFrontIndex;
+        RCT2_GLOBAL(0x00EE7880, paint_entry *) = &sessions[session_to_use].PaintStructs[4000 - 1];
+        memcpy(RCT2_ADDRESS(0x00F1A50C, paint_struct), &sessions[session_to_use].Quadrants[0], 512 * sizeof(paint_struct *));
+        memcpy(RCT2_ADDRESS(0x00EE788C, paint_struct), &sessions[session_to_use].PaintStructs[0].basic, 4000 * sizeof(paint_struct));
         RCT2_GLOBAL(0x00EE7884, paint_struct*) = nullptr;
-        RCT2_GLOBAL(RCT2_ADDRESS_CURRENT_ROTATION, uint32_t) = sessions[0].CurrentRotation;
+        RCT2_GLOBAL(RCT2_ADDRESS_CURRENT_ROTATION, uint32_t) = sessions[session_to_use].CurrentRotation;
         RCT2_CALLPROC_X(0x688217, 0, 0, 0, 0, 0, 0, 0);
-        result3 = paint_struct_list_to_string(ps.next_quadrant_ps, &sessions[0].PaintStructs[0].basic);
+        result3 = paint_struct_list_to_string(ps.next_quadrant_ps, &sessions[session_to_use].PaintStructs[0].basic);
     }
     bool ok = true;
     std::cout << "r1: " << result1 << std::endl;
