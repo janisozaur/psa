@@ -28,7 +28,7 @@ int32_t DISABLE_OPT RCT2_CALLPROC_X(
 {
     int32_t result = 0;
     _originalAddress = address;
-#if defined(PLATFORM_X86) && !defined(NO_RCT2)
+#if defined(__i386__) || defined(_M_IX86)
 #    ifdef _MSC_VER
     __asm {
         push ebp
@@ -73,7 +73,7 @@ int32_t DISABLE_OPT RCT2_CALLPROC_X(
         : "eax","ecx","edx","esi","edi","memory");
     // clang-format on
 #    endif // _MSC_VER
-#endif     // PLATFORM_X86
+#endif // x86
     _originalAddress = 0;
     // lahf only modifies ah, zero out the rest
     return result & 0xFF00;
