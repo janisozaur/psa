@@ -201,8 +201,12 @@ static void BM_paint_session_arrange(benchmark::State& state, const std::vector<
     {
         state.PauseTiming();
         std::copy_n(local_s, std::size(sessions), sessions.begin());
-        state.ResumeTiming();
-        paint_session_arrange(&sessions[0]);
+        for (int i = 0; i < std::size(sessions); i++) {
+            // Provide fair conditions for vanilla and pause like it pauses
+            state.PauseTiming();
+            state.ResumeTiming();
+            paint_session_arrange(&sessions[i]);
+        }
         benchmark::DoNotOptimize(sessions);
     }
     state.SetItemsProcessed(state.iterations() * std::size(sessions));
@@ -222,8 +226,12 @@ static void BM_paint_session_arrange_opt(benchmark::State& state, const std::vec
     {
         state.PauseTiming();
         std::copy_n(local_s, std::size(sessions), sessions.begin());
-        state.ResumeTiming();
-        paint_session_arrange_opt(&sessions[0]);
+        for (int i = 0; i < std::size(sessions); i++) {
+            // Provide fair conditions for vanilla and pause like it pauses
+            state.PauseTiming();
+            state.ResumeTiming();
+            paint_session_arrange_opt(&sessions[i]);
+        }
         benchmark::DoNotOptimize(sessions);
     }
     state.SetItemsProcessed(state.iterations() * std::size(sessions));
@@ -245,17 +253,20 @@ static void BM_paint_session_arrange_vanilla(benchmark::State& state, const std:
     {
         state.PauseTiming();
         std::copy_n(local_s, std::size(sessions), sessions.begin());
-        paint_struct ps;
-        RCT2_GLOBAL(0x00EE7888, paint_struct*) = &ps;
-        RCT2_GLOBAL(0x00F1AD0C, uint32_t) = sessions[0].QuadrantBackIndex;
-        RCT2_GLOBAL(0x00F1AD10, uint32_t) = sessions[0].QuadrantFrontIndex;
-        RCT2_GLOBAL(0x00EE7880, paint_entry *) = &sessions[0].PaintStructs[4000 - 1];
-        memcpy(RCT2_ADDRESS(0x00F1A50C, paint_struct), &sessions[0].Quadrants[0], 512 * sizeof(paint_struct *));
-        memcpy(RCT2_ADDRESS(0x00EE788C, paint_struct), &sessions[0].PaintStructs[0].basic, 4000 * sizeof(paint_struct));
-        RCT2_GLOBAL(0x00EE7884, paint_struct*) = nullptr;
-        RCT2_GLOBAL(RCT2_ADDRESS_CURRENT_ROTATION, uint32_t) = sessions[0].CurrentRotation;
-        state.ResumeTiming();
-        RCT2_CALLPROC_X(0x688217, 0, 0, 0, 0, 0, 0, 0);
+        for (int i = 0; i < std::size(sessions); i++) {
+            state.PauseTiming();
+            paint_struct ps;
+            RCT2_GLOBAL(0x00EE7888, paint_struct*) = &ps;
+            RCT2_GLOBAL(0x00F1AD0C, uint32_t) = sessions[i].QuadrantBackIndex;
+            RCT2_GLOBAL(0x00F1AD10, uint32_t) = sessions[i].QuadrantFrontIndex;
+            RCT2_GLOBAL(0x00EE7880, paint_entry *) = &sessions[i].PaintStructs[4000 - 1];
+            memcpy(RCT2_ADDRESS(0x00F1A50C, paint_struct), &sessions[i].Quadrants[0], 512 * sizeof(paint_struct *));
+            memcpy(RCT2_ADDRESS(0x00EE788C, paint_struct), &sessions[i].PaintStructs[0].basic, 4000 * sizeof(paint_struct));
+            RCT2_GLOBAL(0x00EE7884, paint_struct*) = nullptr;
+            RCT2_GLOBAL(RCT2_ADDRESS_CURRENT_ROTATION, uint32_t) = sessions[i].CurrentRotation;
+            state.ResumeTiming();
+            RCT2_CALLPROC_X(0x688217, 0, 0, 0, 0, 0, 0, 0);
+        }
         benchmark::DoNotOptimize(sessions);
     }
     state.SetItemsProcessed(state.iterations() * std::size(sessions));
