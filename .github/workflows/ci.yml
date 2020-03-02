@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: install packages
-      run: sudo apt-get install libbenchmark-dev:i386
+      run: sudo dpkg --add-architecture i386 && sudo apt-get update && sudo apt-get install libbenchmark-dev:i386
     - name: configure
       run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_32BIT=on ..
     - name: build
