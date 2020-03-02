@@ -276,7 +276,7 @@ static void BM_paint_session_arrange_vanilla(benchmark::State& state, const std:
 static void fixup()
 {
     const char * segments = (char *)(0x401000);
-    int err = mprotect((void *)0x401000, 0x8a4000 - 0x401000, PROT_READ | PROT_EXEC | PROT_WRITE);
+    int err = mprotect((void *)0x401000, 0x8a4000 - 0x401000, PROT_READ | PROT_EXEC);
 	if (err != 0)
 	{
 		perror("mprotect");
