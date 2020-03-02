@@ -16,4 +16,4 @@ jobs:
     - name: build
       run: cmake --build build
     - name: benchmark
-      run: cd build && ./psa ../dome-roof-on_zoom0.sv6.psa || sudo coredumpctl info
+      run: cd build && LD_PRELOAD=libSegFault.so ./psa ../dome-roof-on_zoom0.sv6.psa || sudo coredumpctl info
