@@ -160,8 +160,8 @@ static bool verify(const std::vector<paint_session> inputSessions)
         RCT2_GLOBAL(0x00F1AD0C, uint32_t) = sessions[session_to_use].QuadrantBackIndex;
         RCT2_GLOBAL(0x00F1AD10, uint32_t) = sessions[session_to_use].QuadrantFrontIndex;
         RCT2_GLOBAL(0x00EE7880, paint_entry *) = &sessions[session_to_use].PaintStructs[4000 - 1];
+        //memcpy(RCT2_ADDRESS(0x00EE788C, paint_struct), &sessions[session_to_use].PaintStructs[0].basic, 4000 * sizeof(paint_struct));
         memcpy(RCT2_ADDRESS(0x00F1A50C, paint_struct), &sessions[session_to_use].Quadrants[0], 512 * sizeof(paint_struct *));
-        memcpy(RCT2_ADDRESS(0x00EE788C, paint_struct), &sessions[session_to_use].PaintStructs[0].basic, 4000 * sizeof(paint_struct));
         RCT2_GLOBAL(0x00EE7884, paint_struct*) = nullptr;
         RCT2_GLOBAL(RCT2_ADDRESS_CURRENT_ROTATION, uint32_t) = sessions[session_to_use].CurrentRotation;
         RCT2_CALLPROC_X(0x688217, 0, 0, 0, 0, 0, 0, 0);
@@ -261,7 +261,7 @@ static void BM_paint_session_arrange_vanilla(benchmark::State& state, const std:
             RCT2_GLOBAL(0x00F1AD10, uint32_t) = sessions[i].QuadrantFrontIndex;
             RCT2_GLOBAL(0x00EE7880, paint_entry *) = &sessions[i].PaintStructs[4000 - 1];
             memcpy(RCT2_ADDRESS(0x00F1A50C, paint_struct), &sessions[i].Quadrants[0], 512 * sizeof(paint_struct *));
-            memcpy(RCT2_ADDRESS(0x00EE788C, paint_struct), &sessions[i].PaintStructs[0].basic, 4000 * sizeof(paint_struct));
+            //memcpy(RCT2_ADDRESS(0x00EE788C, paint_struct), &sessions[i].PaintStructs[0].basic, 4000 * sizeof(paint_struct));
             RCT2_GLOBAL(0x00EE7884, paint_struct*) = nullptr;
             RCT2_GLOBAL(RCT2_ADDRESS_CURRENT_ROTATION, uint32_t) = sessions[i].CurrentRotation;
             state.ResumeTiming();
