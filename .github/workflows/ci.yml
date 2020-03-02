@@ -15,3 +15,5 @@ jobs:
       run: mkdir build && cd build && env CXX=clang++ cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_32BIT=on ..
     - name: build
       run: cmake --build build
+    - name: benchmark
+      run: cd build && ./psa ../dome-roof-on_zoom0.sv6.psa
