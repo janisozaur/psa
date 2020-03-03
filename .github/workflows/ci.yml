@@ -25,7 +25,9 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: install packages
-      run: sudo apt-get update && sudo apt-get install libbenchmark-dev zlib1g-dev libicu-dev g++ clang
+      run: sudo apt-get update && sudo apt-get install zlib1g-dev g++ clang
+    - name: install Google benchmark
+      run: git clone https://github.com/google/benchmark && cd benchmark && cmake . -DCMAKE_BUILD_TYPE=relwithdebinfo -DBUILD_SHARED_LIBS=ON -DBENCHMARK_ENABLE_GTEST_TESTS=OFF && sudo make install -j2 && cd ..
     - name: configure
       run: mkdir build && cd build && env CXX=clang++ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_32BIT=off ..
     - name: build
