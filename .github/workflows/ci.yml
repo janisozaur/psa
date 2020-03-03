@@ -3,17 +3,32 @@ name: C/C++ CI
 on: [push]
 
 jobs:
-  build-ubuntu:
+  build-x86:
 
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v1
     - name: install packages
-      run: sudo dpkg --add-architecture i386 && sudo apt-get update && sudo apt-get install libbenchmark-dev:i386 zlib1g-dev:i386 libicu-dev:i386 g++-multilib clang systemd-coredump
+      run: sudo dpkg --add-architecture i386 && sudo apt-get update && sudo apt-get install libbenchmark-dev:i386 zlib1g-dev:i386 libicu-dev:i386 g++-multilib clang
     - name: configure
       run: mkdir build && cd build && env CXX=clang++ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_32BIT=on ..
     - name: build
       run: cmake --build build
     - name: benchmark
-      run: cd build && LD_PRELOAD=libSegFault.so ./psa ../dome-roof-on_zoom0.sv6.psa || sudo coredumpctl info
+      run: cd build && LD_PRELOAD=libSegFault.so ./psa ../dome-roof-on_zoom0.sv6.psa
+
+  build-x86_64:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: install packages
+      run: sudo apt-get update && sudo apt-get install libbenchmark-dev zlib1g-dev libicu-dev g++ clang
+    - name: configure
+      run: mkdir build && cd build && env CXX=clang++ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_32BIT=off ..
+    - name: build
+      run: cmake --build build
+    - name: benchmark
+      run: cd build && LD_PRELOAD=libSegFault.so ./psa ../dome-roof-on_zoom0.sv6.psa
