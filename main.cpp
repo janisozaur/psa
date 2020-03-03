@@ -111,11 +111,11 @@ static std::vector<paint_session> extract_paint_session(const char* fname)
     uLong fsize = ftell(file) - 4;
     fseek(file, 4, SEEK_SET);
     uint32_t org_cb = cb;
-    auto compressedBuffer = std::make_unique<uint8_t[]>(fsize - 4);
-    res = fread(compressedBuffer.get(), fsize - 4, 1, file);
+    auto compressedBuffer = std::make_unique<uint8_t[]>(fsize);
+    res = fread(compressedBuffer.get(), fsize, 1, file);
     fclose(file);
     auto buffer = std::make_unique<uint8_t[]>(cb);
-    int dcpr_result = uncompress(buffer.get(), &cb, compressedBuffer.get(), fsize - 4);
+    int dcpr_result = uncompress(buffer.get(), &cb, compressedBuffer.get(), fsize);
     if (cb != org_cb || Z_OK != dcpr_result) {
         std::cout << "Invalid decompressed size " << cb << ", expected " << org_cb << ", dcpr_result = " << dcpr_result << std::endl;
         auto stringifier = [dcpr_result](){
