@@ -152,7 +152,9 @@ static bool verify(const std::vector<paint_session> inputSessions)
         paint_session_arrange_opt(&sessions[session_to_use]);
     }
     auto result2 = paint_struct_list_to_string(sessions[session_to_use].PaintHead.next_quadrant_ps, &sessions[session_to_use].PaintStructs[0].basic);
+
     std::string result3;
+#if defined(__i386__) || defined(_M_IX86)
     {
         std::copy_n(local_s, std::size(sessions), sessions.begin());
         paint_struct ps;
@@ -160,6 +162,7 @@ static bool verify(const std::vector<paint_session> inputSessions)
         RCT2_GLOBAL(0x00F1AD0C, uint32_t) = sessions[session_to_use].QuadrantBackIndex;
         RCT2_GLOBAL(0x00F1AD10, uint32_t) = sessions[session_to_use].QuadrantFrontIndex;
         RCT2_GLOBAL(0x00EE7880, paint_entry *) = &sessions[session_to_use].PaintStructs[4000 - 1];
+        // Not actually required, as the code only iterates over the pointees from quadrants.
         //memcpy(RCT2_ADDRESS(0x00EE788C, paint_struct), &sessions[session_to_use].PaintStructs[0].basic, 4000 * sizeof(paint_struct));
         memcpy(RCT2_ADDRESS(0x00F1A50C, paint_struct), &sessions[session_to_use].Quadrants[0], 512 * sizeof(paint_struct *));
         RCT2_GLOBAL(0x00EE7884, paint_struct*) = nullptr;
@@ -167,6 +170,7 @@ static bool verify(const std::vector<paint_session> inputSessions)
         RCT2_CALLPROC_X(0x688217, 0, 0, 0, 0, 0, 0, 0);
         result3 = paint_struct_list_to_string(ps.next_quadrant_ps, &sessions[session_to_use].PaintStructs[0].basic);
     }
+#endif
     bool ok = true;
     std::cout << "r1: " << result1 << std::endl;
     std::cout << "r2: " << result2 << std::endl;
@@ -175,6 +179,7 @@ static bool verify(const std::vector<paint_session> inputSessions)
         std::cout << "error 1" << std::endl;
         ok = false;
     }
+#if defined(__i386__) || defined(_M_IX86)
     if (result2 != result3) {
         std::cout << "error 2" << std::endl;
         ok = false;
@@ -183,6 +188,7 @@ static bool verify(const std::vector<paint_session> inputSessions)
         std::cout << "error 3" << std::endl;
         ok = false;
     }
+#endif
 
     delete[] local_s;
     return ok;
@@ -261,6 +267,7 @@ static void BM_paint_session_arrange_vanilla(benchmark::State& state, const std:
             RCT2_GLOBAL(0x00F1AD10, uint32_t) = sessions[i].QuadrantFrontIndex;
             RCT2_GLOBAL(0x00EE7880, paint_entry *) = &sessions[i].PaintStructs[4000 - 1];
             memcpy(RCT2_ADDRESS(0x00F1A50C, paint_struct), &sessions[i].Quadrants[0], 512 * sizeof(paint_struct *));
+            // Not actually required, as the code only iterates over the pointees from quadrants.
             //memcpy(RCT2_ADDRESS(0x00EE788C, paint_struct), &sessions[i].PaintStructs[0].basic, 4000 * sizeof(paint_struct));
             RCT2_GLOBAL(0x00EE7884, paint_struct*) = nullptr;
             RCT2_GLOBAL(RCT2_ADDRESS_CURRENT_ROTATION, uint32_t) = sessions[i].CurrentRotation;
