@@ -115,9 +115,24 @@ static std::vector<paint_session> extract_paint_session(const char* fname)
     res = fread(compressedBuffer.get(), fsize - 4, 1, file);
     fclose(file);
     auto buffer = std::make_unique<uint8_t[]>(cb);
-    uncompress(buffer.get(), &cb, compressedBuffer.get(), fsize - 4);
-    if (cb != org_cb) {
-        std::cout << "Invalid decompressed size " << cb << ", expected " << org_cb << std::endl;
+    int dcpr_result = uncompress(buffer.get(), &cb, compressedBuffer.get(), fsize - 4);
+    if (cb != org_cb || Z_OK != dcpr_result) {
+        std::cout << "Invalid decompressed size " << cb << ", expected " << org_cb << ", dcpr_result = " << dcpr_result << std::endl;
+        auto stringifier = [dcpr_result](){
+            switch (dcpr_result) {
+                case Z_OK:
+                    return "Z_OK";
+                case Z_MEM_ERROR:
+                    return "Z_MEM_ERROR";
+                case Z_BUF_ERROR:
+                    return "Z_BUF_ERROR";
+                case Z_DATA_ERROR:
+                    return "Z_DATA_ERROR";
+                default:
+                    return "unknown";
+            };
+        };
+        std::cout << "dcpr_result = " << stringifier() << std::endl;
         return {};
     }
     MemoryStream ms(buffer.get(), cb);
