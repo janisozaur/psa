@@ -33,7 +33,7 @@ jobs:
     - name: build
       run: cmake --build build
     - name: benchmark
-      run: cd build && LD_PRELOAD=libSegFault.so ./psa --benchmark_min_time=0.9 ../dome-roof-on_zoom0.sv6.psa
+      run: cd build && LD_PRELOAD=libSegFault.so LD_LIBRARY_PATH=/usr/local/lib/ ./psa --benchmark_min_time=0.9 ../dome-roof-on_zoom0.sv6.psa
 
   build-x86_64-windows:
     runs-on: windows-latest
