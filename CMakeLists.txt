@@ -64,4 +64,8 @@ if (BUILD_32BIT)
 endif()
 
 # Don't bother doing find_package(), it probably won't give correct results for 32-bit anyway
-target_link_libraries(psa z benchmark pthread)
+target_link_libraries(psa z benchmark)
+
+if (NOT WIN32)
+    target_link_libraries(psa pthread)
+endif()
