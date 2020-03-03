@@ -9,16 +9,30 @@
 #include <iostream>
 #include <iterator>
 #include <memory>
-#include <sys/mman.h>
+#ifdef __linux
+    #include <sys/mman.h>
+#elif defined(_WIN32)
+    #define WIN32_LEAN_AND_MEAN
+    #include <windows.h>
+#endif
 #include <zlib.h>
 
 #define RCT2_ADDRESS_CURRENT_ROTATION 0x0141E9E0
 
+#ifdef __linux
 static bool platform_file_exists(const utf8* path)
 {
     bool exists = access(path, F_OK) != -1;
     return exists;
 }
+#elif defined(_WIN32)
+static bool platform_file_exists(const utf8* path)
+{
+    DWORD result = GetFileAttributesA(path);
+    DWORD error = GetLastError();
+    return !(result == INVALID_FILE_ATTRIBUTES && (error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND));
+}
+#endif
 
 static paint_struct read_paint_struct(MemoryStream &ms)
 {
@@ -92,9 +106,9 @@ static std::vector<paint_session> extract_paint_session(const char* fname)
 {
     FILE* file = fopen(fname, "r");
     uLongf cb{};
-    int res = fread(&cb, 4, 1, file);
+    size_t res = fread(&cb, 4, 1, file);
     fseek(file, 0, SEEK_END);
-    uint64_t fsize = ftell(file) - 4;
+    uLong fsize = ftell(file) - 4;
     fseek(file, 4, SEEK_SET);
     uint32_t org_cb = cb;
     auto compressedBuffer = std::make_unique<uint8_t[]>(fsize - 4);
@@ -282,6 +296,7 @@ static void BM_paint_session_arrange_vanilla(benchmark::State& state, const std:
 
 static void fixup()
 {
+#ifdef __linux
     const char * segments = (char *)(0x401000);
     int err = mprotect((void *)0x401000, 0x8a4000 - 0x401000, PROT_READ | PROT_EXEC);
 	if (err != 0)
@@ -294,6 +309,7 @@ static void fixup()
 	{
 		perror("mprotect");
 	}
+#endif
 }
 #else
 static void fixup() {}

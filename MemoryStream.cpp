@@ -120,7 +120,7 @@ uint64_t MemoryStream::GetPosition() const
 
 void MemoryStream::SetPosition(uint64_t position)
 {
-    Seek(position, STREAM_SEEK_BEGIN);
+    Seek(position, ISTREAM_SEEK_BEGIN);
 }
 
 void MemoryStream::Seek(int64_t offset, int32_t origin)
@@ -129,13 +129,13 @@ void MemoryStream::Seek(int64_t offset, int32_t origin)
     switch (origin)
     {
         default:
-        case STREAM_SEEK_BEGIN:
+        case ISTREAM_SEEK_BEGIN:
             newPosition = offset;
             break;
-        case STREAM_SEEK_CURRENT:
+        case ISTREAM_SEEK_CURRENT:
             newPosition = GetPosition() + offset;
             break;
-        case STREAM_SEEK_END:
+        case ISTREAM_SEEK_END:
             newPosition = _dataSize + offset;
             break;
     }

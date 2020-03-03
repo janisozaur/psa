@@ -63,9 +63,11 @@ if (BUILD_32BIT)
     set_target_properties(psa PROPERTIES LINK_FLAGS ${RCT2_SEGMENT_LINKER_FLAGS})
 endif()
 
-# Don't bother doing find_package(), it probably won't give correct results for 32-bit anyway
-target_link_libraries(psa z benchmark)
-
 if (NOT WIN32)
-    target_link_libraries(psa pthread)
+    # Don't bother doing find_package(), it probably won't give correct results for 32-bit anyway
+    target_link_libraries(psa PRIVATE z benchmark pthread)
+else()
+    find_package(ZLIB REQUIRED)
+    find_package(benchmark CONFIG REQUIRED)
+    target_link_libraries(psa PRIVATE benchmark::benchmark benchmark::benchmark_main ZLIB::ZLIB)
 endif()

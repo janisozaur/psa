@@ -38,10 +38,10 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: install vcpkg
-      run: vcpkg install benchmark:x64-windows-static zlib:x64-windows-static
+      run: vcpkg install benchmark:x64-windows zlib:x64-windows
     - name: cmake configure
-      run: cmake . -DCMAKE_BUILD_TYPE=relwithdebinfo -A x64
+      run: cmake . -A x64 -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows
     - name: build
-      run: cmake --build .
+      run: cmake --build . --config Release
     - name: benchmark
-      run: psa --benchmark_min_time=0.9 dome-roof-on_zoom0.sv6.psa
+      run: Release/psa --benchmark_min_time=0.9 dome-roof-on_zoom0.sv6.psa

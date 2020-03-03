@@ -16,22 +16,21 @@
 #include <string>
 #include <vector>
 
-#define interface struct
 #define abstract = 0
 
 using utf8 = char;
 
 enum
 {
-    STREAM_SEEK_BEGIN,
-    STREAM_SEEK_CURRENT,
-    STREAM_SEEK_END
+    ISTREAM_SEEK_BEGIN,
+    ISTREAM_SEEK_CURRENT,
+    ISTREAM_SEEK_END
 };
 
 /**
  * Represents a stream that can be read or written to. Implemented by types such as FileStream, NetworkStream or MemoryStream.
  */
-interface IStream
+struct IStream
 {
     ///////////////////////////////////////////////////////////////////////////
     // Interface methods
