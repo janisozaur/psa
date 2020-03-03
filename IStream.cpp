@@ -40,21 +40,3 @@ std::string IStream::ReadStdString()
     }
     return result;
 }
-
-void IStream::WriteString(const utf8* str)
-{
-    if (str == nullptr)
-    {
-        WriteValue<uint8_t>(0);
-    }
-    else
-    {
-        size_t numBytes = String::SizeOf(str) + 1;
-        Write(str, numBytes);
-    }
-}
-
-void IStream::WriteString(const std::string& str)
-{
-    WriteString(str.c_str());
-}

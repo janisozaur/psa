@@ -9,8 +9,6 @@
 
 #pragma once
 
-#include "Guard.hpp"
-
 #include <cstdlib>
 #include <cstring>
 #include <typeinfo>
@@ -23,21 +21,18 @@ namespace Memory
     template<typename T> static T* Allocate()
     {
         T* result = (T*)malloc(sizeof(T));
-        Guard::ArgumentNotNull(result, "Failed to allocate %zu bytes for %s", sizeof(T), typeid(T).name());
         return result;
     }
 
     template<typename T> static T* Allocate(size_t size)
     {
         T* result = (T*)malloc(size);
-        Guard::ArgumentNotNull(result, "Failed to allocate %zu bytes for %s", size, typeid(T).name());
         return result;
     }
 
     template<typename T> static T* AllocateArray(size_t count)
     {
         T* result = (T*)malloc(count * sizeof(T));
-        Guard::ArgumentNotNull(result, "Failed to allocate array of %zu * %s (%zu bytes)", count, typeid(T).name(), sizeof(T));
         return result;
     }
 
@@ -52,7 +47,6 @@ namespace Memory
         {
             result = (T*)realloc((void*)ptr, size);
         }
-        Guard::ArgumentNotNull(result, "Failed to reallocate %x (%s) to have %zu bytes", ptr, typeid(T).name(), size);
         return result;
     }
 
@@ -67,8 +61,6 @@ namespace Memory
         {
             result = (T*)realloc((void*)ptr, count * sizeof(T));
         }
-        Guard::ArgumentNotNull(
-            result, "Failed to reallocate array at %x (%s) to have %zu entries", ptr, typeid(T).name(), count);
         return result;
     }
 
