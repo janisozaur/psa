@@ -124,7 +124,7 @@ static std::vector<paint_session> extract_paint_session(const char* fname)
             std::cout << "incomplete read, so far got " << res << " bytes out of " << fsize << std::endl;
         }
         counter++;
-        if (counter > fsize) {
+        if (counter > 100) {
             return {};
         }
     }
