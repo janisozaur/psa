@@ -15,6 +15,11 @@ jobs:
       run: mkdir build && cd build && env CXX=clang++ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_32BIT=on ..
     - name: build
       run: cmake --build build
+    - name: Upload artifacts (CI)
+      uses: actions/upload-artifact@v1
+      with:
+        name: "OpenRCT2-lin32"
+        path: build
     - name: benchmark
       run: cd build && LD_PRELOAD=libSegFault.so ./psa --benchmark_min_time=0.9 ../dome-roof-on_zoom0.sv6.psa
 
@@ -32,6 +37,11 @@ jobs:
       run: mkdir build && cd build && env CXX=clang++ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_32BIT=off ..
     - name: build
       run: cmake --build build
+    - name: Upload artifacts (CI)
+      uses: actions/upload-artifact@v1
+      with:
+        name: "OpenRCT2-lin64"
+        path: build
     - name: benchmark
       run: cd build && LD_PRELOAD=libSegFault.so LD_LIBRARY_PATH=/usr/local/lib/ ./psa --benchmark_min_time=0.9 ../dome-roof-on_zoom0.sv6.psa
 
@@ -45,5 +55,10 @@ jobs:
       run: cmake . -A x64 -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows
     - name: build
       run: cmake --build . --config Release
+    - name: Upload artifacts (CI)
+      uses: actions/upload-artifact@v1
+      with:
+        name: "OpenRCT2-win64"
+        path: Release
     - name: benchmark
       run: Release/psa --benchmark_min_time=0.9 dome-roof-on_zoom0.sv6.psa
