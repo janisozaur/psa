@@ -107,12 +107,20 @@ static std::vector<paint_session> extract_paint_session(const char* fname)
     FILE* file = fopen(fname, "r");
     uLongf cb{};
     size_t res = fread(&cb, 4, 1, file);
+    if (res != 1) {
+        std::cout << "Invalid read, expected 1 element, got " << res << std::endl;
+        return {};
+    }
     fseek(file, 0, SEEK_END);
     uLong fsize = ftell(file) - 4;
     fseek(file, 4, SEEK_SET);
     uint32_t org_cb = cb;
     auto compressedBuffer = std::make_unique<uint8_t[]>(fsize);
-    res = fread(compressedBuffer.get(), fsize, 1, file);
+    res = fread(compressedBuffer.get(), 1, fsize, file);
+    if (res != fsize) {
+        std::cout << "Invalid read, expected " << fsize << " elements, got " << res << std::endl;
+        return {};
+    }
     fclose(file);
     auto buffer = std::make_unique<uint8_t[]>(cb);
     int dcpr_result = uncompress(buffer.get(), &cb, compressedBuffer.get(), fsize);
