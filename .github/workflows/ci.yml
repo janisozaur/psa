@@ -17,13 +17,15 @@ jobs:
       run: mkdir build && cd build && env CXX=clang++ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_32BIT=on ..
     - name: build
       run: cmake --build build
+    - name: copy Google benchmark
+      run: cp -r /usr/local/lib32/* build
     - name: Upload artifacts (CI)
       uses: actions/upload-artifact@v1
       with:
         name: "psa-lin32"
         path: build
     - name: benchmark
-      run: cd build && LD_PRELOAD=libSegFault.so ./psa --benchmark_min_time=0.9 ../dome-roof-on_zoom0.sv6.psa
+      run: cd build && LD_PRELOAD=libSegFault.so LD_LIBRARY_PATH=/usr/local/lib32/ ./psa --benchmark_min_time=0.9 ../dome-roof-on_zoom0.sv6.psa
 
   build-x86_64:
 
