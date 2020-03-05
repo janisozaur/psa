@@ -117,8 +117,16 @@ static std::vector<paint_session> extract_paint_session(const char* fname)
     uint32_t org_cb = cb;
     auto compressedBuffer = std::make_unique<uint8_t[]>(fsize);
     res = 0;
+    uLong counter = 0;
     while (res < fsize) {
         res += fread(compressedBuffer.get() + res, 1, fsize - res, file);
+        if (res < fsize) {
+            std::cout << "incomplete read, so far got " << res << " bytes out of " << fsize << std::endl;
+        }
+        counter++;
+        if (counter > fsize) {
+            return {};
+        }
     }
     if (res != fsize) {
         std::cout << "Invalid read, expected " << fsize << " elements, got " << res << std::endl;
