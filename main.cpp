@@ -417,15 +417,20 @@ static HANDLE h{};
 static HANDLE h2{};
 static uint8_t* mapping{};
 
+int main(int argc, const char* argv[]);
+
+extern "C" const void* WinMainCRTStartup;
+
 void load_section() {
     SYSTEM_INFO si{};
     GetSystemInfo(&si);
     printf("Allocation granularity: 0x%x\n", si.dwAllocationGranularity);
+    printf("main = %p, _WinMainCRTStartup = %p\n", main, WinMainCRTStartup);
     h = CreateFileA("openrct2.exe", GENERIC_ALL, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
     printf("file handle: %d\n", h);
     h2 = CreateFileMappingA(h, nullptr, PAGE_EXECUTE_READWRITE, 0, 0, nullptr);
     printf("mapping handle: %d\n", h2);
-    mapping = (uint8_t*)MapViewOfFileEx(h2, FILE_MAP_ALL_ACCESS, 0, 0, 0x670000, (void *)0x1400000);
+    mapping = (uint8_t*)MapViewOfFileEx(h2, FILE_MAP_ALL_ACCESS, 0, 0, 0x670000, (void *)0x400000);
     auto err = GetLastError();
     printf("mapping %p, err = 0x%x\n", mapping, err);
     for (int i = 0; i < 16; i++) {
