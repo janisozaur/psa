@@ -14,7 +14,7 @@ jobs:
     - name: install Google benchmark
       run: git clone https://github.com/google/benchmark && cd benchmark && CFLAGS=-m32 LDFLAGS=-m32 cmake . -DCMAKE_BUILD_TYPE=relwithdebinfo -DBUILD_SHARED_LIBS=ON -DBENCHMARK_ENABLE_GTEST_TESTS=OFF -DCMAKE_CXX_FLAGS="-m32" -DCMAKE_INSTALL_LIBDIR=lib32 && sudo make install -j2 && cd ..
     - name: configure
-      run: mkdir build && cd build && env CXX=clang++ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_32BIT=on ..
+      run: mkdir build && cd build && env CXX=clang++ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_32BIT=on -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON ..
     - name: build
       run: cmake --build build
     - name: copy Google benchmark
