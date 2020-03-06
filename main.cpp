@@ -3,7 +3,9 @@
 #include "structs.h"
 #include "psa_openrct2.h"
 
+#ifdef WITH_BENCHMARK
 #include <benchmark/benchmark.h>
+#endif
 #include <cstdio>
 #include <cstdint>
 #include <iostream>
@@ -242,6 +244,8 @@ static bool verify(const std::vector<paint_session> inputSessions)
     return ok;
 }
 
+
+#ifdef WITH_BENCHMARK
 static void BM_paint_session_arrange(benchmark::State& state, const std::vector<paint_session> inputSessions)
 {
     std::vector<paint_session> sessions = inputSessions;
@@ -407,3 +411,46 @@ int main(int argc, char* argv[])
     ::benchmark::RunSpecifiedBenchmarks();
     return 0;
 }
+#else
+
+static HANDLE h{};
+static HANDLE h2{};
+static uint8_t* mapping{};
+
+void load_section() {
+    SYSTEM_INFO si{};
+    GetSystemInfo(&si);
+    printf("Allocation granularity: 0x%x\n", si.dwAllocationGranularity);
+    h = CreateFileA("openrct2.exe", GENERIC_ALL, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    printf("file handle: %d\n", h);
+    h2 = CreateFileMappingA(h, nullptr, PAGE_EXECUTE_READWRITE, 0, 0, nullptr);
+    printf("mapping handle: %d\n", h2);
+    mapping = (uint8_t*)MapViewOfFileEx(h2, FILE_MAP_ALL_ACCESS, 0, 0, 0x670000, (void *)0x1400000);
+    auto err = GetLastError();
+    printf("mapping %p, err = 0x%x\n", mapping, err);
+    for (int i = 0; i < 16; i++) {
+        printf("%02x ", mapping[i + 0x1000]);
+    }
+    printf("\n");
+    UnmapViewOfFile(mapping);
+    CloseHandle(h);
+    CloseHandle(h);
+}
+
+int main(int argc, const char* argv[])
+{
+    load_section();
+    for (int i = 1; i < argc; i++)
+    {
+        if (platform_file_exists(argv[i]))
+        {
+            // Register benchmark for sv6 if valid
+            std::vector<paint_session> sessions = extract_paint_session(argv[i]);
+            if (!sessions.empty())
+            {
+                verify(sessions);
+            }
+        }
+    }
+}
+#endif
