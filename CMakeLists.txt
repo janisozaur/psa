@@ -58,6 +58,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TARGET_M}")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${TARGET_M}")
 
 add_executable(psa "psa_openrct2.cpp" "MemoryStream.cpp" "IStream.cpp" "psa_opt.cpp" ${ADDRESSES_CPP} "main.cpp" ${RCT2_SECTIONS})
+set_source_files_properties(${CMAKE_SOURCE_DIR}/Addresses.cpp PROPERTIES COMPILE_FLAGS "-O0 -fno-omit-stack-pointer")
 
 if (BUILD_32BIT)
     set_target_properties(psa PROPERTIES LINK_FLAGS ${RCT2_SEGMENT_LINKER_FLAGS})
