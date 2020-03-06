@@ -104,7 +104,7 @@ static void fixup_pointers(paint_session* s, size_t paint_session_entries, size_
 
 static std::vector<paint_session> extract_paint_session(const char* fname)
 {
-    FILE* file = fopen(fname, "r");
+    FILE* file = fopen(fname, "rb");
     uLongf cb{};
     size_t res = fread(&cb, 4, 1, file);
     if (res != 1) {
