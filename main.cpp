@@ -428,10 +428,12 @@ void load_section() {
     mapping = (uint8_t*)MapViewOfFileEx(h2, FILE_MAP_ALL_ACCESS, 0, 0, 0x670000, (void *)0x400000);
     auto err = GetLastError();
     printf("mapping %p, err = 0x%x\n", mapping, err);
-    for (int i = 0; i < 16; i++) {
-        printf("%02x ", mapping[i + 0x1000]);
+    if (mapping != nullptr) {
+        for (int i = 0; i < 16; i++) {
+            printf("%02x ", mapping[i + 0x1000]);
+        }
+        printf("\n");
     }
-    printf("\n");
     UnmapViewOfFile(mapping);
     CloseHandle(h);
     CloseHandle(h);
