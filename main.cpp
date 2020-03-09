@@ -16,6 +16,7 @@
 #elif defined(_WIN32)
     #define WIN32_LEAN_AND_MEAN
     #include <windows.h>
+    #include <shellapi.h>
 #endif
 #include <zlib.h>
 
@@ -353,7 +354,7 @@ static void fixup()
 static void fixup() {}
 #endif
 
-int main(int argc, char* argv[])
+int main_psa(int argc, char* argv[])
 {
     fixup();
     {
@@ -412,7 +413,7 @@ int main(int argc, char* argv[])
     return 0;
 }
 #else
-
+#if WITH_MAIN
 static HANDLE h{};
 static HANDLE h2{};
 static uint8_t* mapping{};
@@ -455,4 +456,24 @@ int main(int argc, const char* argv[])
         }
     }
 }
-#endif
+#else // WITH_MAIN
+extern "C" __declspec(dllexport) int StartOpenRCT(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+    int main_psa(int argc, char* argv[]);
+    int argc{};
+    auto argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+    for (int i = 1; i < argc; i++)
+    {
+        if (platform_file_exists(argv[i]))
+        {
+            // Register benchmark for sv6 if valid
+            std::vector<paint_session> sessions = extract_paint_session(argv[i]);
+            if (!sessions.empty())
+            {
+                verify(sessions);
+            }
+        }
+    }
+    return 0;
+}
+#endif // WITH_MAIN
+#endif // WITH_BENCHMARK
